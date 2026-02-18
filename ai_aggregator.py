@@ -85,14 +85,24 @@ def _call_mistral(prompt):
     )
     return response.choices[0].message.content.strip()
 
+def _call_openrouter(prompt):
+    try:
+        response = openrouter_client.chat.completions.create(
+            model="meta-llama/llama-3.1-8b-instruct",
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return response.choices[0].message.content.strip()
 
+    except Exception as e:
+        return None  # Return None instead of error string
+"""
 def _call_openrouter(prompt):
     response = openrouter_client.chat.completions.create(
-        model="meta-llama/llama-3.1-8b-instruct:free",
+        model="meta-llama/llama-3.1-8b-instruct",
         messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content.strip()
-
+"""
 
 # ------------------------------
 # ASYNC WRAPPERS
@@ -146,7 +156,50 @@ Then provide a final improved summarized answer.
 # ------------------------------
 # FULL MULTI-LLM PIPELINE
 # ------------------------------
+# ------------------------------
+# FULL MULTI-LLM PIPELINE (RESILIENT)
+# ------------------------------
 
+async def run_full_pipeline(prompt):
+
+    # Spinner for user feedback
+    stop_event = asyncio.Event()
+    spinner_task = asyncio.create_task(spinner(stop_event))
+
+    try:
+        # Run all 3 AIs concurrently
+        results = await asyncio.gather(
+            call_groq(prompt),
+            call_mistral(prompt),
+            call_openrouter(prompt),
+        )
+    finally:
+        stop_event.set()
+        await spinner_task
+
+    # Filter out any failed responses (None or error strings)
+    valid_results = [r for r in results if r and not r.startswith("[")]
+
+    if not valid_results:
+        print("\n❌ All AI responses failed. Please try again later.\n")
+        return
+
+    # Judge Phase only evaluates valid results
+    stop_event = asyncio.Event()
+    spinner_task = asyncio.create_task(spinner(stop_event))
+
+    try:
+        judge_result = await judge_answers(prompt, valid_results)
+    finally:
+        stop_event.set()
+        await spinner_task
+
+    print("\n--------------------------------------------\n")
+    print(f"AI 1 (Groq):\n{results[0]}\n")
+    print(f"AI 2 (Mistral):\n{results[1]}\n")
+    print(f"AI 3 (OpenRouter):\n{results[2] if results[2] else '[Failed/Unavailable]'}\n")
+    print(f"Conclusion by AI 4:\n{judge_result}\n")
+"""
 async def run_full_pipeline(prompt):
 
     stop_event = asyncio.Event()
@@ -179,7 +232,7 @@ async def run_full_pipeline(prompt):
     print(f"AI 3 (OpenRouter):\n{results[2]}\n")
     print(f"Conclusion by AI 4:\n{judge_result}\n")
 
-
+"""
 # ------------------------------
 # FAST MODE
 # ------------------------------
