@@ -1,40 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>AI Aggregator Agent - Multi LLM Orchestration</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f4f6f8;
-            color: #333;
-        }
-        h1, h2, h3 {
-            color: #1f2937;
-        }
-        code {
-            background-color: #e5e7eb;
-            padding: 4px 6px;
-            border-radius: 4px;
-        }
-        pre {
-            background-color: #111827;
-            color: #f9fafb;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-        }
-        .section {
-            margin-bottom: 40px;
-        }
-        .highlight {
-            background-color: #dbeafe;
-            padding: 10px;
-            border-left: 5px solid #2563eb;
-        }
-    </style>
-</head>
 <body>
 
 <h1>AI Aggregator Agent</h1>
